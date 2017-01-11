@@ -10,10 +10,12 @@ import scala.io.StdIn
 class ConsoleStream extends FStream[String, String]
     with TimeoutSupport
 {
+    selfRef =>
+
     override def read(timeout: Duration): Future[String] = {
         val p = Promise[String]
         Future{
-            val line = StdIn.readLine()
+            val line = selfRef.synchronized{ StdIn.readLine() }
             p.success(line)
         }
         withTimeoutDo(timeout)(p.future)
@@ -22,7 +24,7 @@ class ConsoleStream extends FStream[String, String]
     override def write(elem: String): Future[Unit] = {
         val p = Promise[Unit]
         Future{
-            println(elem)
+            selfRef.synchronized{ println(elem) }
             p.success(())
         }
         p.future
