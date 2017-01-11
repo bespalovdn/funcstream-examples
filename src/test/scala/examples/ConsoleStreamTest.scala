@@ -48,6 +48,10 @@ class ConsoleStreamTest extends FutureExtensions
         def prompt(msg: String): Consumer[Unit] = FConsumer { implicit stream =>
             stream.write(msg) >> success(consume())
         }
+        /*def repeat(c: Consumer[Unit], nTimes: Int): Consumer[Unit] = FConsumer { implicit stream =>
+            if(nTimes > 0) c.apply(stream) >> repeat(c, nTimes - 1).apply(stream)
+            else success(consume())
+        }*/
         // build the pipeline and run:
         val result = stream <=> readInt <=> {
             prompt("This is some kind of calculator. Please follow the instructions:") >>
