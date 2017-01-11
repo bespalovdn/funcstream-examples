@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class ConsoleStreamTest
+class ConsoleStreamTest extends FutureExtensions
 {
     implicit def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
 
@@ -21,10 +21,11 @@ class ConsoleStreamTest
             } yield consume()
         }
         val result = stream <=> greeting
-        waitResult(result)
+        waitFor(result)
     }
 
     def test2(): Unit = {
+        type Consumer[A] = FPlainConsumer[Int, String, A]
         // string => int transformer:
         val readInt: FPipe[String, String, Int, String] = FPipe{ upStream =>
             new FStream[Int, String] {
@@ -32,27 +33,36 @@ class ConsoleStreamTest
                 override def write(elem: String): Future[Unit] = upStream.write(elem)
             }
         }
-        val adder: FPlainConsumer[Int, String, Unit] = FConsumer{ implicit stream => for{
+        val adder: Consumer[Unit] = FConsumer{ implicit stream => for{
                 _ <- stream.write("Input some number to summarize: ")
                 n <- stream.read()
                 _ <- stream.write(s"$n + $n = " + (n + n))
             } yield consume()
         }
-        val multiplier: FPlainConsumer[Int, String, Unit] = FConsumer{ implicit stream => for{
+        val multiplier: Consumer[Unit] = FConsumer{ implicit stream => for{
                 _ <- stream.write("Input some number to multiply: ")
                 n <- stream.read()
                 _ <- stream.write(s"$n * $n = " + (n * n))
             } yield consume()
         }
-        val result = stream <=> readInt <=> (adder >> multiplier)
-        waitResult(result)
+        def prompt(msg: String): Consumer[Unit] = FConsumer { implicit stream =>
+            stream.write(msg) >> success(consume())
+        }
+        // build the pipeline and run:
+        val result = stream <=> readInt <=> {
+            prompt("This is some kind of calculator. Please follow the instructions:") >>
+            adder >>
+            multiplier >>
+            prompt("That's it!")
+        }
+        waitFor(result)
     }
 
-    def waitResult[A](f: Future[A]) = {
+    def waitFor[A](f: Future[A]) = {
         Await.ready(f, Duration.Inf)
         f.value match {
             case Some(Success(_)) => println("Success")
-            case Some(Failure(t)) => println("Failed with: " + t.getMessage)
+            case Some(Failure(t)) => println("Failed with %s: %s" format(t.getClass.getSimpleName, t.getMessage))
             case _ => throw new IllegalStateException()
         }
     }
