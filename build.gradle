@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bespalovdn:functional-streams_2.12:1.0.5-SNAPSHOT'
+    compile 'com.github.bespalovdn:functional-streams_2.12:1.0.0.3-SNAPSHOT'
     compile 'org.scala-lang:scala-library:2.12.1'
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
     testCompile 'junit:junit:4.12'
