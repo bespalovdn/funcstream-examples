@@ -1,7 +1,6 @@
-package examples
+package com.github.bespalovdn.funcstream.examples.stream
 
 import com.github.bespalovdn.funcstream._
-import com.github.bespalovdn.funcstream.examples.stream.ConsoleStream
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -74,5 +73,5 @@ class ConsoleStreamTest extends FutureExtensions
 
 object ConsoleStreamTest extends App
 {
-    new ConsoleStreamTest().test2()
+    new ConsoleStreamTest().test1()
 }

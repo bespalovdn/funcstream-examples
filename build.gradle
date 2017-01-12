@@ -1,6 +1,7 @@
 apply plugin: 'scala'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'application'
 
 group = "com.github.bespalovdn"
 archivesBaseName = "funcstream-examples_2.12"
@@ -8,6 +9,16 @@ version = '1.0.0.1-SNAPSHOT'
 
 compileScala {
     options.compilerArgs << "-deprecation"
+}
+
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
+        attributes 'Main-Class': 'com.github.bespalovdn.funcstream.examples.stream.ConsoleStreamTest'
+    }
 }
 
 repositories {
