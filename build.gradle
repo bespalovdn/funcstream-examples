@@ -5,7 +5,7 @@ apply plugin: 'application'
 
 group = "com.github.bespalovdn"
 archivesBaseName = "funcstream-examples_2.12"
-version = '1.0.0.1-SNAPSHOT'
+version = '1.0.0.3-SNAPSHOT'
 
 compileScala {
     options.compilerArgs << "-deprecation"
